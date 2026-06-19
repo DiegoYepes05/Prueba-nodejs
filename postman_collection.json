@@ -1,0 +1,77 @@
+{
+  "info": {
+    "name": "API Confiabilidad de Conductores",
+    "description": "Colección para probar la API. Crea un conductor primero: su id se guarda automáticamente en la variable {{conductorId}} y lo usan los demás requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "conductorId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+      }
+    },
+    {
+      "name": "Crear conductor",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "  const body = pm.response.json();",
+              "  pm.collectionVariables.set('conductorId', body.id);",
+              "  console.log('conductorId guardado:', body.id);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Ana Pérez\",\n  \"cedula\": \"1023456789\",\n  \"ciudad\": \"Bogotá\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/conductores", "host": ["{{baseUrl}}"], "path": ["conductores"] }
+      }
+    },
+    {
+      "name": "Registrar viaje",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"origen\": \"Bogotá\",\n  \"destino\": \"Medellín\",\n  \"valorFlete\": 2500000,\n  \"aTiempo\": true,\n  \"conductorId\": \"{{conductorId}}\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/viajes", "host": ["{{baseUrl}}"], "path": ["viajes"] }
+      }
+    },
+    {
+      "name": "Obtener conductor por id",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/conductores/{{conductorId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["conductores", "{{conductorId}}"]
+        }
+      }
+    },
+    {
+      "name": "Listar conductores (ranking)",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/conductores", "host": ["{{baseUrl}}"], "path": ["conductores"] }
+      }
+    }
+  ]
+}

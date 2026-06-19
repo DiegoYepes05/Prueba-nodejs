@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Conductor {
+  id        String   @id @default(uuid())
+  nombre    String
+  cedula    String   @unique
+  ciudad    String
+  viajes    Viaje[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("conductores")
+}
+
+model Viaje {
+  id          String   @id @default(uuid())
+  origen      String
+  destino     String
+  valorFlete  Int
+  aTiempo     Boolean
+  conductorId String
+  conductor   Conductor @relation(fields: [conductorId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@index([conductorId])
+  @@map("viajes")
+}

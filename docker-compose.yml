@@ -1,0 +1,38 @@
+# Para desarrollo, basta con la DB: `docker compose up -d db` y luego `npm run dev`.
+# Para correr TODO en contenedores (app + DB): `docker compose up --build`.
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: confiabilidad-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: confiabilidad
+    ports:
+      - "5432:5432"
+    volumes:
+      - confiabilidad_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d confiabilidad"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: confiabilidad-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Dentro de la red de compose la DB se resuelve por el nombre del servicio: "db"
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/confiabilidad?schema=public"
+      PORT: 3000
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+
+volumes:
+  confiabilidad_pgdata:
